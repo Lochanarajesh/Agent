@@ -7,27 +7,41 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAuth } from "@/lib/auth-context"
 
-interface LoginCardProps {
-  onSwitchToSignUp: () => void
+interface SignUpCardProps {
+  onSwitchToLogin: () => void
 }
 
-export function LoginCard({ onSwitchToSignUp }: LoginCardProps) {
+export function SignUpCard({ onSwitchToLogin }: SignUpCardProps) {
+  const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
-  const { login } = useAuth()
+  const { signup } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match")
+      return
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters")
+      return
+    }
+
     setIsLoading(true)
 
     try {
-      const result = await login(email, password)
+      const result = await signup(name, email, password)
       if (!result.success) {
-        setError(result.error || "Invalid email or password")
+        setError(result.error || "An error occurred")
       }
     } catch {
       setError("An error occurred. Please try again.")
@@ -44,16 +58,29 @@ export function LoginCard({ onSwitchToSignUp }: LoginCardProps) {
           <div className="w-14 h-14 rounded-xl bg-primary flex items-center justify-center mb-4">
             <Brain className="h-8 w-8 text-primary-foreground" />
           </div>
-          <h1 className="text-2xl font-semibold text-foreground">Welcome to Memora</h1>
-          <p className="text-muted-foreground text-sm mt-1">Sign in to access your AI assistant</p>
+          <h1 className="text-2xl font-semibold text-foreground">Create Account</h1>
+          <p className="text-muted-foreground text-sm mt-1">Join Memora to get started</p>
         </div>
 
-        {/* Login Form */}
+        {/* Sign Up Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-foreground">Email</Label>
+            <Label htmlFor="name" className="text-foreground">Full Name</Label>
             <Input
-              id="email"
+              id="name"
+              type="text"
+              placeholder="John Doe"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              className="h-11 bg-secondary border-border text-foreground placeholder:text-muted-foreground focus:ring-primary"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="signup-email" className="text-foreground">Email</Label>
+            <Input
+              id="signup-email"
               type="email"
               placeholder="name@example.com"
               value={email}
@@ -64,20 +91,12 @@ export function LoginCard({ onSwitchToSignUp }: LoginCardProps) {
           </div>
 
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password" className="text-foreground">Password</Label>
-              <button
-                type="button"
-                className="text-xs text-primary hover:text-primary/80 transition-colors"
-              >
-                Forgot Password?
-              </button>
-            </div>
+            <Label htmlFor="signup-password" className="text-foreground">Password</Label>
             <div className="relative">
               <Input
-                id="password"
+                id="signup-password"
                 type={showPassword ? "text" : "password"}
-                placeholder="Enter your password"
+                placeholder="Create a password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -89,6 +108,28 @@ export function LoginCard({ onSwitchToSignUp }: LoginCardProps) {
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="confirm-password" className="text-foreground">Confirm Password</Label>
+            <div className="relative">
+              <Input
+                id="confirm-password"
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="Confirm your password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                className="h-11 bg-secondary border-border text-foreground placeholder:text-muted-foreground focus:ring-primary pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
           </div>
@@ -105,10 +146,10 @@ export function LoginCard({ onSwitchToSignUp }: LoginCardProps) {
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Signing in...
+                Creating account...
               </>
             ) : (
-              "Sign In"
+              "Create Account"
             )}
           </Button>
         </form>
@@ -162,15 +203,15 @@ export function LoginCard({ onSwitchToSignUp }: LoginCardProps) {
           </Button>
         </div>
 
-        {/* Sign Up Link */}
+        {/* Login Link */}
         <p className="text-center text-sm text-muted-foreground mt-6">
-          {"Don't have an account? "}
+          Already have an account?{" "}
           <button
             type="button"
-            onClick={onSwitchToSignUp}
+            onClick={onSwitchToLogin}
             className="text-primary hover:text-primary/80 font-medium transition-colors"
           >
-            Sign Up
+            Sign In
           </button>
         </p>
       </div>
