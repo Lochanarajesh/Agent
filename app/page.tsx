@@ -1,15 +1,20 @@
-import { Header } from "@/components/header"
-import { ChatContainer } from "@/components/chat-container"
+"use client"
+
+import { useAuth } from "@/lib/auth-context"
+import { LoginCard } from "@/components/login-card"
+import { AuthLayout } from "@/components/auth-layout"
+import { ChatPage } from "@/components/chat-page"
 
 export default function Home() {
-  return (
-    <div className="flex flex-col h-screen bg-background">
-      <Header />
-      <main className="flex-1 overflow-hidden">
-        <div className="max-w-3xl mx-auto h-full">
-          <ChatContainer />
-        </div>
-      </main>
-    </div>
-  )
+  const { isAuthenticated } = useAuth()
+
+  if (!isAuthenticated) {
+    return (
+      <AuthLayout>
+        <LoginCard />
+      </AuthLayout>
+    )
+  }
+
+  return <ChatPage />
 }
